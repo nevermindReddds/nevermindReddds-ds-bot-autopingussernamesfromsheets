@@ -3,7 +3,6 @@ const { google } = require('googleapis');
 const path = require('path');
 const fs = require('fs');
 
-// Загрузите файл JSON с учетными данными
 const credentialsPath = path.join(__dirname, 'credentials.json');
 const credentials = JSON.parse(fs.readFileSync(credentialsPath));
 
@@ -20,7 +19,6 @@ const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBit
 
 const sheets = google.sheets({ version: 'v4', auth });
 
-// Определите диапазоны ячеек для команд
 const ranges = {
     '!смена1': '05.08 - 11.08!H17:H25',
     '!смена2': '05.08 - 11.08!H37:H52',
@@ -34,10 +32,8 @@ const ranges = {
     '!смена10':'05.08 - 11.08!H198:H213',
     '!смена11':'05.08 - 11.08!H218:H233',
     '!смена12':'05.08 - 11.08!H228:H230'
-    // Добавьте остальные диапазоны
 };
 
-// Функция для получения данных из Google Таблицы
 async function getGoogleSheetData(range) {
     try {
         const res = await sheets.spreadsheets.values.get({
@@ -45,7 +41,6 @@ async function getGoogleSheetData(range) {
             range: range,
         });
 
-        // Фильтрация пустых строк
         const filteredRows = res.data.values ? res.data.values.filter(row => row.some(cell => cell.trim() !== '')) : [];
         
         return filteredRows;
@@ -55,11 +50,9 @@ async function getGoogleSheetData(range) {
     }
 }
 
-// Обработка сообщений и команд
 client.on('messageCreate', async message => {
     if (message.author.bot) return;
 
-    // Обработка команд для разных диапазонов
     for (const [command, range] of Object.entries(ranges)) {
         if (message.content.startsWith(command)) {
             const rows = await getGoogleSheetData(range);
@@ -72,14 +65,8 @@ client.on('messageCreate', async message => {
             return;
         }
     }
-
-    // Пример другой команды
-    if (message.content.startsWith('!hello')) {
-        message.channel.send('Привет! Как я могу помочь?');
-    }
 });
 
-// Когда бот готов, выводим сообщение в консоль
 client.on('ready', () => {
     console.log(`Logged in as ${client.user.tag}!`);
 });
